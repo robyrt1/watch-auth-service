@@ -1,73 +1,132 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Auth Service API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Microserviço centralizado responsável por toda a gestão de identidade e autenticação de usuários, incluindo registro, login e validação de sessão via JWT.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+##
 
-## Description
+Este projeto foi desenhado com base nos princípios da **Arquitetura Limpa (Clean Architecture)** e do **Domain-Driven Design (DDD)**. Esta abordagem garante um baixo acoplamento, alta coesão e uma clara separação entre a lógica de negócio e as preocupações de infraestrutura.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+  - **Padrão CQRS:** As responsabilidades são segregadas entre `Commands` (operações de escrita) e `Queries` (operações de leitura) para otimizar e escalar cada fluxo de trabalho de forma independente.
+  - **Orientado a Eventos:** A arquitetura adota uma abordagem orientada a eventos com **RabbitMQ** para comunicação assíncrona, permitindo o desacoplamento entre este e outros microserviços.
+  - **Estrutura de Camadas:**
+      - **`domain/`**: O coração da aplicação. Contém as entidades de domínio (ex: User), regras de negócio, exceções e os contratos dos repositórios. É totalmente agnóstico a tecnologias externas.
+      - **`application/`**: Camada que orquestra os fluxos e casos de uso. Contém os Handlers para os Commands e Queries.
+      - **`infrastructure/`**: Implementações concretas de tecnologias externas, como persistência com PostgreSQL (TypeORM), mensageria com RabbitMQ e segurança.
+      - **`interfaces/`**: A camada mais externa, responsável pela interação com o mundo exterior, primariamente através de uma API HTTP (Controllers, DTOs de requisição/resposta).
 
-## Installation
+## ✨ Recursos
+
+  - Registro de novos usuários com validação e hash de senha.
+  - Autenticação de usuários e geração de token JWT.
+  - Endpoint protegido para verificar os dados do usuário logado (`/me`).
+  - Publicação de eventos de domínio (ex: `UserRegisteredEvent`) no RabbitMQ para notificar outros serviços.
+  - Tracing distribuído com **OpenTelemetry** e **Jaeger** para monitoramento e depuração.
+
+## 🚀 Começando
+
+Siga as instruções para configurar e rodar o `auth-service` em seu ambiente local.
+
+### Pré-requisitos
+
+  - Node.js (v18 ou superior)
+  - NPM ou Yarn
+  - Docker e Docker Compose
+
+### Instalação
+
+1.  Clone o repositório e entre na pasta do projeto.
+
+2.  Instale as dependências:
+
+    ```bash
+    npm install
+    ```
+
+3.  Configure as variáveis de ambiente criando um arquivo `.env` na raiz, a partir do `.env.example`.
+
+    ```.env
+    # Database
+      DATABASE_HOST=localhost
+      DATABASE_PORT=5432
+      DATABASE_USERNAME=watch
+      DATABASE_PASSWORD=watch
+      DATABASE_NAME=watch     
+
+      # JWT
+      JWT_SECRET=your_super_secret_jwt_key
+      JWT_EXPIRES_IN=1h     
+      
+
+      # Jaeger
+      JAEGER_AGENT_HOST=localhost
+      JAEGER_AGENT_PORT=6832      
+      
+
+      # Rabbitmq
+      RABBITMQ_HOST=localhost
+      RABBITMQ_PORT=5672
+      RABBITMQ_USER=guest
+      RABBITMQ_PASSWORD=guest
+      RABBITMQ_QUEUE=auth_events_queue      
+
+      # Tracing
+      OTEL_SERVICE_NAME=auth-service
+    ```
+
+### Rodando as Dependências com Docker
+
+Este serviço depende de instâncias do PostgreSQL, RabbitMQ e Jaeger. Use os seguintes comandos para iniciá-las via Docker Compose a partir da raiz do projeto:
 
 ```bash
-$ npm install
+# Para iniciar o banco de dados PostgreSQL
+docker compose -f postgres.docker-compose.yml up -d
+
+# Para iniciar o broker de mensageria RabbitMQ
+docker compose -f rabbitmq.docker-compose.yml up -d
+
+# Para iniciar o coletor de traces do Jaeger
+docker compose -f jaeger.docker-compose.yml up -d
 ```
 
-## Running the app
+### Rodando a Aplicação
+
+Com as dependências rodando, inicie a API NestJS:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm run start:dev
 ```
 
-## Test
+A API estará disponível em `http://localhost:3000`.
+
+## 🧪 Testes
+
+Para rodar os testes unitários e de integração:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run test
 ```
 
-## Support
+Para rodar os testes end-to-end:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+npm run test:e2e
+```
 
-## Stay in touch
+## 📡 Endpoints da API
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Endpoints principais expostos pela `AuthController`:
 
-## License
+| Método | Rota             | Descrição                                         |
+| :----- | :--------------- | :------------------------------------------------ |
+| `POST` | `/auth/register` | Registra um novo usuário.                         |
+| `POST` | `/auth/login`    | Autentica um usuário e retorna um token JWT.      |
+| `GET`  | `/auth/me`       | Retorna os dados do usuário autenticado (protegido). |
 
-Nest is [MIT licensed](LICENSE).
+## 🛠️ Tecnologias Utilizadas
+
+  - **Framework:** NestJS, TypeScript
+  - **Banco de Dados:** PostgreSQL, TypeORM
+  - **Mensageria:** RabbitMQ
+  - **Autenticação:** Passport.js, JWT, Bcrypt
+  - **Observabilidade:** OpenTelemetry, Jaeger
+  - **Contêineres:** Docker, Docker Compose
