@@ -1,0 +1,36 @@
+
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: rabbitmq
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    # RABBITMQ_DEFAULT_VHOST: / # Opcional: Define um vhost padrão (pode ser útil em ambientes maiores)
+    volumes:
+      # Opcional: Persiste os dados do RabbitMQ para que as filas e mensagens não sejam perdidas
+      # se o container for removido ou reiniciado. Crie um diretório 'rabbitmq_data' na raiz do seu projeto.
+      - rabbitmq_data:/var/lib/rabbitmq/mnesia
+      - rabbitmq_log:/var/log/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - app_network
+
+volumes:
+  rabbitmq_data:
+  rabbitmq_log:
+
+networks:
+  app_network:
+    driver: bridge
