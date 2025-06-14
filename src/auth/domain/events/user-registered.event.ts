@@ -6,6 +6,6 @@ export interface UserRegisteredEventPayload {
 }
 
 export class UserRegisteredEvent {
-    public readonly name = 'user.registered'; // Nome do evento para identificação
+    public readonly name = 'user.registered';
     constructor(public readonly payload: UserRegisteredEventPayload) { }
 }

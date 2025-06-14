@@ -15,11 +15,8 @@ export const getRabbitMQClientOptions = (configService: ConfigService): ClientOp
             urls: [`amqp://${rabbitmqUser}:${rabbitmqPass}@${rabbitmqHost}:${rabbitmqPort}`],
             queue: rabbitmqQueue,
             queueOptions: {
-                durable: false,
+                durable: true,
             },
-            // Para publish/subscribe, é comum usar exchanges, não apenas filas diretas
-            // exchange: 'auth_exchange',
-            // exchangeType: 'topic',
         },
     };
 };
