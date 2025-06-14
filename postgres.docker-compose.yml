@@ -1,0 +1,19 @@
+version: '3'
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: watch
+      POSTGRES_USER: watch
+      POSTGRES_DB: watch
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - mynetwork
+    ports:
+      - "5432:5432"
+networks:
+  mynetwork:
+volumes:
+  postgres-data:
