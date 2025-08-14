@@ -5,18 +5,17 @@
         "ts"
     ],
     "rootDir": ".",
-    "testRegex": ".*\\.spec\\.ts$",
+    "testEnvironment": "node",
+    "testRegex": ".unit.spec.ts$",
     "transform": {
         "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
         "**/*.(t|j)s"
     ],
-    "coverageDirectory": "./coverage",
-    "testEnvironment": "node",
+    "coverageDirectory": "./coverage/unit",
     "roots": [
-        "<rootDir>/src/",
-        "<rootDir>/test/"
+        "<rootDir>/test/unit"
     ],
     "moduleNameMapper": {
         "^src/(.*)$": "<rootDir>/src/$1"

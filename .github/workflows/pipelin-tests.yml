@@ -1,4 +1,4 @@
-name: NestJS Unit Tests CI
+name: Tests CI
 
 on: [pull_request, push]
 
@@ -24,4 +24,4 @@ jobs:
         run: npm ci
 
       - name: Run unit tests
-        run: npm run test
+        run: npm run test:unit
